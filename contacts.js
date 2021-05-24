@@ -4,58 +4,57 @@ const path = require('path')
 const contactsPath = path.join(__dirname, './db/contacts.json');
 
 
-// TODO: задокументировать каждую функцию
 function findContact (contacts,contactId){
   const contact = contacts.find(contact=>contact.id === contactId);
   return contact;
 };
 
 function listContacts() {
-  return  fs.readFile(contactsPath)
+ fs.readFile(contactsPath)
     .then((data) => {
         const parseData = JSON.parse(data)
-        // console.log(parseData)
-        return parseData
+        console.table(parseData);
     })
     .catch((err) => console.log(err.message))
 }
 
-
   function getContactById(contactId) {
-  return listContacts().then(data => {
-      const filterDataId = data.filter(contact => contact.id === Number(contactId))
-      return filterDataId[0]
+    fs.readFile(contactsPath).then(data => {
+      const contacts = JSON.parse(data);
+      const filterDataId = contacts.filter(contact => contact.id === Number(contactId))
+      console.table(filterDataId)
        })
      .catch((err) => console.log("Такого контакта нет: ", err.message))
   }
 
   function removeContact(contactId) {
-    return listContacts()
-    .then(data => {
-      const bool = findContact(data, Number(contactId))
+    
+    fs.readFile(contactsPath).then(data => {
+      const contacts = JSON.parse(data);
+      const bool = findContact(contacts, Number(contactId))
       if(!bool){
         console.log("Такого контакта нету")
         return
       }
-        const dataArray = [...data]
-        const filterContact =  dataArray.filter(contact => contact.id !== Number(contactId))
-        const jsonStringify = JSON.stringify(filterContact)
-        fs.writeFile(contactsPath, jsonStringify)
+        const dataArray = [...contacts]
+        const parseContact =  JSON.stringify(dataArray.filter(contact => contact.id !== Number(contactId)))
+        fs.writeFile(contactsPath, parseContact)
         console.log("Контакт удалён");
     })
     .catch((err) => console.log(err.message))
   }
 
   function addContact(name, email, phone) {
-    return listContacts()
+    fs.readFile(contactsPath)
       .then(data => {
+        const contacts = JSON.parse(data)
         const newObject = {
           id: shortid.generate(),
           name,
           email,
           phone
         }
-          const dataArray = [...data]
+          const dataArray = [...contacts]
           dataArray.push(newObject)
          return JSON.stringify(dataArray)
       }).then(contacts =>   {
